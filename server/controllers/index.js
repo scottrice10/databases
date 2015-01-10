@@ -6,7 +6,9 @@ module.exports = {
     get: function(req, res) {
       models.messages.findAll({})
         .success(function(messages) {
-          res.send(messages);
+          res.send({
+            results: messages
+          });
         })
         .error(function(err) {
           console.log(err);
