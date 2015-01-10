@@ -5,119 +5,130 @@ module.exports = {
   messages: {
     get: function(req, res) {
       models.messages.findAll({})
-        .success(function(messages) {
+        .then(function(messages) {
           res.send({
             results: messages
           });
         })
-        .error(function(err) {
+        .fail(function(err) {
           console.log(err);
         });
     }, // a function which handles a get request for all messages
     post: function(req, res) {
         var getUser = function() {
           models.users.findOrCreate({
+            where: {
               name: req.body.username
-            })
-            .success(function(user) {
-              getRooms(user);
-            })
-            .error(function(err) {
-              console.log(err);
-            });
+            },
+            defaults: {
+              //properties to be created
+            }
+          }).then(function(user) {
+            getRooms(user);
+          }).fail(function(err) {
+            console.log('Error occured', err);
+          });
         };
         getUser();
 
         var getRooms = function(user) {
           models.rooms.findOrCreate({
+            where: {
               name: req.body.roomname
-            })
-            .success(function(room) {
-              insertMessages(user, room);
-            })
-            .error(function(err) {
-              console.log(err);
-            });
+            },
+            defaults: {
+              //properties to be created
+            }
+          }).then(function(room) {
+            insertMessages(user, room);
+          }).fail(function(err) {
+            console.log('Error occured', err);
+          });
         };
 
         var insertMessages = function(user, room) {
-          models.rooms.create({
-              text: req.body.text,
-              user: user.name,
-              room: room.name
-            })
-            .success(function(messages) {
-              res.send(messages);
-            })
-            .error(function(err) {
-              console.log(err);
-            });
+          models.messages.create({
+            text: req.body.text,
+            userId: user.id,
+            roomId: room.id
+          }).then(function(message) {
+            res.send(message);
+          }).fail(function(err) {
+            console.log('Error occured', err);
+          });
         };
-
-        // var message = models.messages.build({
-        //   text: req.body.text
-        // });
-
-        // var room = models.rooms.findOrCreate({
-        //   name: req.body.roomname
-        // });
-
-        // var user = models.users.findOrCreate({
-        //   name: req.body.username
-        // });
-
-        // message.setRooms(room);
-        // message.setUsers(user);
-
-        // message.save();
       } // a function which handles posting a message to the database
   },
 
   users: {
     // Ditto as above
     get: function(req, res) {
-      models.users.findAll({})
-        .success(function(users) {
-          res.send(users);
-        })
-        .error(function(err) {
-          console.log(err);
-        });
+      models.users.findOrCreate({
+        where: {
+          name: req.body.username
+        },
+        defaults: {
+          //properties to be created
+        }
+      }).then(function(user) {
+        var created = user[1];
+        user = user[0];
+        console.log(user.values);
+      }).fail(function(err) {
+        console.log('Error occured', err);
+      });
     },
     post: function(req, res) {
       models.users.findOrCreate({
+        where: {
           name: req.body.username
-        })
-        .success(function(user) {
-          res.send(user);
-        })
-        .error(function(err) {
-          console.log(err);
-        });
+        },
+        defaults: {
+          //properties to be created
+        }
+      }).then(function(user) {
+        var created = user[1];
+        user = user[0];
+        console.log(user.values);
+      }).fail(function(err) {
+        console.log('Error occured', err);
+      });
     }
   },
 
   rooms: {
     // Ditto as above
     get: function(req, res) {
-      models.rooms.findAll({})
-        .success(function(rooms) {
-          res.send(rooms);
-        })
-        .error(function(err) {
-          console.log(err);
-        });
+      models.rooms.findOrCreate({
+        where: {
+          name: req.body.roomname
+        },
+        defaults: {
+          //properties to be created
+        }
+      }).then(function(room) {
+        var created = room[1];
+        room = room[0];
+        console.log(room.values);
+      }).fail(function(err) {
+        console.log('Error occured', err);
+      });
     },
     post: function(req, res) {
       models.rooms.findOrCreate({
+        where: {
           name: req.body.roomname
-        })
-        .success(function(room) {
-          res.send(room);
-        })
-        .error(function(err) {
-          console.log(err);
-        });
+        },
+        defaults: {
+          //properties to be created
+        }
+      }).then(function(room) {
+        var created = room[1];
+        room = room[0];
+        console.log(room.values);
+      }).fail(function(err) {
+        console.log('Error occured', err);
+      });
     }
   }
 };

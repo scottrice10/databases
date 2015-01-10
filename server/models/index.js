@@ -52,3 +52,15 @@ exports.users.hasMany(exports.messages);
 //One to many relationship from room to messages
 exports.messages.belongsTo(exports.rooms);
 exports.rooms.hasMany(exports.messages);
+
+chatDatabase
+  .authenticate()
+  .complete(function(err) {
+    // Even if we didn't define any foreign key or something else,
+    // instances of Target will have a column SourceId!
+    if (!!err) {
+      console.log('Unable to connect to the database:', err)
+    } else {
+      console.log('Connection has been established successfully.')
+    }
+  });
