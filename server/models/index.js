@@ -1,7 +1,8 @@
-var chatDatabase = require('../db').chatDatabase;
 var Sequelize = require("sequelize");
 
-exports.users = chatDatabase.define("users", {
+exports.chatDatabase = require('../db').chatDatabase;
+
+exports.users = exports.chatDatabase.define("users", {
   name: Sequelize.INTEGER,
   createdAt: {
     type: Sequelize.DATE,
@@ -9,11 +10,11 @@ exports.users = chatDatabase.define("users", {
   },
   updatedAt: {
     type: Sequelize.DATE,
-    field: "created_at"
+    field: "updated_at"
   }
 });
 
-exports.rooms = chatDatabase.define("rooms", {
+exports.rooms = exports.chatDatabase.define("rooms", {
   name: Sequelize.INTEGER,
   createdAt: {
     type: Sequelize.DATE,
@@ -21,11 +22,11 @@ exports.rooms = chatDatabase.define("rooms", {
   },
   updatedAt: {
     type: Sequelize.DATE,
-    field: "created_at"
+    field: "updated_at"
   }
 });
 
-exports.messages = chatDatabase.define("messages", {
+exports.messages = exports.chatDatabase.define("messages", {
   text: Sequelize.STRING,
   userId: {
     type: Sequelize.INTEGER,
@@ -41,7 +42,7 @@ exports.messages = chatDatabase.define("messages", {
   },
   updatedAt: {
     type: Sequelize.DATE,
-    field: "created_at"
+    field: "updated_at"
   }
 });
 
@@ -53,7 +54,11 @@ exports.users.hasMany(exports.messages);
 exports.messages.belongsTo(exports.rooms);
 exports.rooms.hasMany(exports.messages);
 
-chatDatabase
+exports.messages.sync();
+exports.users.sync();
+exports.rooms.sync();
+
+exports.chatDatabase
   .authenticate()
   .complete(function(err) {
     // Even if we didn't define any foreign key or something else,

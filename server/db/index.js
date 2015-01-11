@@ -4,6 +4,6 @@ var Sequelize = require("sequelize");
 // You will need to connect with the user "root", no password,
 // and to the database "chat".
 exports.chatDatabase = new Sequelize('chat', 'root', '', {
-  host: 'localhost',
+  port: '3306',
   dialect: 'mysql'
 });

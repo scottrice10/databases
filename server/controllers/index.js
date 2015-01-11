@@ -1,63 +1,61 @@
 var models = require('../models');
-var Promise = require('bluebird');
 
 module.exports = {
   messages: {
     get: function(req, res) {
       models.messages.findAll({})
-        .then(function(messages) {
-          res.send({
-            results: messages
-          });
+        .complete(function(err, messages) {
+          if(!!err) {
+            console.log(err);
+          } else if(!messages) {
+            res.send({results: []});
+          } else {
+            res.send({
+              results: messages
+            });
+          }
         })
-        .fail(function(err) {
-          console.log(err);
-        });
     }, // a function which handles a get request for all messages
     post: function(req, res) {
-        var getUser = function() {
-          models.users.findOrCreate({
-            where: {
-              name: req.body.username
-            },
-            defaults: {
-              //properties to be created
-            }
-          }).then(function(user) {
-            getRooms(user);
-          }).fail(function(err) {
-            console.log('Error occured', err);
-          });
-        };
-        getUser();
+      var newUser;
 
-        var getRooms = function(user) {
+      models.users.findOrCreate({
+        where: {
+          name: req.body.username
+        }
+      }).complete(function(err, user) {
+        if(!!err) {
+          console.log('Error occured', err);
+        } else {
+          console.log("user", user);
+          newUser = user[0].dataValues;
           models.rooms.findOrCreate({
             where: {
               name: req.body.roomname
-            },
-            defaults: {
-              //properties to be created
             }
-          }).then(function(room) {
-            insertMessages(user, room);
-          }).fail(function(err) {
-            console.log('Error occured', err);
+          }).complete(function(err, room) {
+            if(!!err) {
+              console.log('Error occured', err);
+            } else {
+              room = room[0].dataValues;
+              models.messages.create({
+                text: req.body.text,
+                userId: newUser.id,
+                roomId: room.id
+              }).complete(function(err, message) {
+                if(!!err) {
+                  console.log('Error occured', err);
+                } else {
+                  message = message.dataValues;
+                  console.log("Message posted:", message);
+                  res.send(message);
+                }
+              });
+            }
           });
-        };
-
-        var insertMessages = function(user, room) {
-          models.messages.create({
-            text: req.body.text,
-            userId: user.id,
-            roomId: room.id
-          }).then(function(message) {
-            res.send(message);
-          }).fail(function(err) {
-            console.log('Error occured', err);
-          });
-        };
-      } // a function which handles posting a message to the database
+        }
+      });
+    } // a function which handles posting a message to the database
   },
 
   users: {
@@ -70,12 +68,14 @@ module.exports = {
         defaults: {
           //properties to be created
         }
-      }).then(function(user) {
-        var created = user[1];
-        user = user[0];
-        console.log(user.values);
-      }).fail(function(err) {
-        console.log('Error occured', err);
+      }).complete(function(err, user) {
+        if(!!err) {
+          console.log(err);
+        } else if(!user) {
+          res.send([]);
+        } else {
+          res.send(user);
+        }
       });
     },
     post: function(req, res) {
@@ -86,12 +86,14 @@ module.exports = {
         defaults: {
           //properties to be created
         }
-      }).then(function(user) {
-        var created = user[1];
-        user = user[0];
-        console.log(user.values);
-      }).fail(function(err) {
-        console.log('Error occured', err);
+      }).complete(function(err, user) {
+        if(!!err) {
+          console.log('Error occured', err);
+        } else {
+          user = user[0];
+          console.log("Message posted:", user.dataValues);
+          res.send(user);
+        }
       });
     }
   },
@@ -106,12 +108,14 @@ module.exports = {
         defaults: {
           //properties to be created
         }
-      }).then(function(room) {
-        var created = room[1];
-        room = room[0];
-        console.log(room.values);
-      }).fail(function(err) {
-        console.log('Error occured', err);
+      }).complete(function(err, room) {
+        if(!!err) {
+          console.log(err);
+        } else if(!room) {
+          res.send([]);
+        } else {
+          res.send(room);
+        }
       });
     },
     post: function(req, res) {
@@ -122,12 +126,14 @@ module.exports = {
         defaults: {
           //properties to be created
         }
-      }).then(function(room) {
-        var created = room[1];
-        room = room[0];
-        console.log(room.values);
-      }).fail(function(err) {
-        console.log('Error occured', err);
+      }).complete(function(err, room) {
+        if(!!err) {
+          console.log('Error occured', err);
+        } else {
+          room = room[0];
+          console.log("Room posted", room.dataValues);
+          res.send(room);
+        }
       });
     }
   }
